@@ -1,0 +1,30 @@
+services:
+  bloglist-frontend-pr:
+    image: frontend-prod
+    build:
+      context: ./bloglist-frontend
+      dockerfile: Dockerfile
+    container_name: bloglist-frontend-prod
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8080
+  bloglist-server-pr:
+    image: backend-prod
+    build:
+      context: ./blogilista
+      dockerfile: Dockerfile
+    container_name: bloglist-server-prod
+    environment:
+      - PORT=${PORT}
+      - MONGODB_URI=${MONGODB_URI}
+      - TEST_MONGODB_URI=${TEST_MONGODB_URI}
+      - SECRET=${SECRET}
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx_.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: bloglistapp-reverse-proxy
+    depends_on:
+      - bloglist-frontend-pr
+      - bloglist-server-pr

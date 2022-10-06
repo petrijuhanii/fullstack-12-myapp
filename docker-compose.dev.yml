@@ -1,0 +1,35 @@
+services:
+  bloglist-frontend:
+    image: hello-frontend-dev
+    build:
+      context: ./bloglist-frontend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./bloglist-frontend/:/usr/src/app/
+    container_name: bloglist-frontend-dev
+    environment:
+      - REACT_APP_BACKEND_URL=http://localhost:8080
+      - DANGEROUSLY_DISABLE_HOST_CHECK=true
+  bloglist-server:
+    image: backend-dev
+    build:
+      context: ./blogilista
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./blogilista/:/usr/src/app
+    container_name: bloglist-server-dev
+    environment:
+      - PORT=${PORT}
+      - MONGODB_URI=${MONGODB_URI}
+      - TEST_MONGODB_URI=${TEST_MONGODB_URI}
+      - SECRET=${SECRET}
+  nginx:
+    image: nginx:1.20.1
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: bloglist-reverse-proxy
+    depends_on:
+      - bloglist-frontend # wait for the frontend container to be started
+      - bloglist-server 
